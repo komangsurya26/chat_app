@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+/* eslint-disable no-unused-vars */
+import { useEffect, useRef, useState } from 'react'
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ReactComponent as Phone } from "../../assets/phone.svg";
@@ -7,6 +8,7 @@ import { ReactComponent as Plus } from "../../assets/plus.svg";
 import Avatar from "../../assets/avatar.png";
 import NoImage from "../../assets/noimage.png";
 import Input from '../../components/Input'
+import { io } from "socket.io-client";
 
 
 const Dashboard = () => {
@@ -16,6 +18,33 @@ const Dashboard = () => {
   const [messages, setMessages] = useState("");
   const [conversation, setConversation] = useState([]);
   const [conversationss, setConversationss] = useState([]);
+  const [socket, setSocket] = useState(null)
+  const messageRef = useRef(null);
+
+  useEffect(() => {
+    messageRef?.current?.scrollIntoView({ behavior: "smooth" });
+  }, [message]);
+  
+
+  useEffect(() => {
+    const newSocket = io("http://localhost:2000")
+    setSocket(newSocket)
+  }, [])
+
+  useEffect(() => {
+    socket?.emit("addUser", user?.id);
+    socket?.on("getUsers", () => {});
+    socket?.on("getMessage", (data) => {
+      setMessage((prev) => ({
+        ...prev,
+        message: [
+          ...prev.message,
+          { message: data.message, user: { id: data.senderId } },
+        ],
+      }));
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket]);
 
 
   useEffect(() => {
@@ -60,6 +89,12 @@ const Dashboard = () => {
   }
 
   const sendMessage = async () => {
+    socket?.emit("sendMessage", {
+      message: messages,
+      senderId: user.id,
+      receiveId: message?.user?.id,
+      conversationId: message?.conversationId,
+    });
     const res = await fetch(`http://localhost:2001/api/message`, {
       method: "POST",
       headers: {
@@ -188,12 +223,15 @@ const Dashboard = () => {
               message.message.map(({ message, user: { id } = {} }, index) => {
                 if (id === user.id) {
                   return (
+                    <>
                     <div
+                      ref={messageRef}
                       key={index}
                       className="max-w-[40%] bg-primary mb-3 rounded-b-xl rounded-tl-xl ml-auto p-4 text-white"
                     >
                       {message}
                     </div>
+                    </>
                   );
                 } else {
                   return (
