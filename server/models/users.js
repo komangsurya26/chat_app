@@ -22,9 +22,13 @@ module.exports = (sequelize, DataTypes) => {
             args: true,
             msg: "Please input your full name",
           },
+          notContains: {
+            args: [" "],
+            msg: "Name cannot with spaces",
+          },
           len: {
             args: [3, 100],
-            msg: "Full name must be between 3 and 100 characters",
+            msg: "Name at least 3 characters",
           },
         },
       },
@@ -56,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
           },
           len: {
             args: [7, 100],
-            msg: "Password must be between 7 and 100 characters",
+            msg: "Password minimum 7 characters",
           },
         },
       },

@@ -2,6 +2,7 @@ require("dotenv").config();
 const {sequelize} = require("../models");
 const bycrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { Op } = require("sequelize");
 
 async function Register (req,res) {
     try {
@@ -82,12 +83,14 @@ async function Login (req,res) {
 
 async function GetUsers(req, res) {
   try {
-    const user = await sequelize.models.Users.findAll();
+    const { userId } = req.params;
+    const user = await sequelize.models.Users.findAll({
+      where: { id: { [Op.ne]: userId } },
+    });
     const userData = Promise.all(
       user.map(async (user) => {
         return {
-          user: { email: user.email, fullName: user.fullName },
-          userId: user.id,
+          user: { id: user.id, email: user.email, fullName: user.fullName },
         };
       })
     );

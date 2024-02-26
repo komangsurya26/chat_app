@@ -32,17 +32,18 @@ const Form = ({ isLoginPage }) => {
 
     if (resData.success) {
       if (resData.token) {
+        localStorage.removeItem("token");
         localStorage.setItem("token", resData.token);
         localStorage.setItem("user", JSON.stringify(resData.user));
-        toast.success("Login Success and Refresh Page");
+        toast.success("Login Success");
         setTimeout(() => {
-          navigate("/");
-        }, 3000);
+          window.location.reload();
+        }, 2000);
       } else {
         toast.success("Registration Success");
         setTimeout(() => {
           navigate("/users/login");
-        }, 3000);
+        }, 2000);
       }
     } else {
       toast.error(resData);
@@ -67,7 +68,7 @@ const Form = ({ isLoginPage }) => {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               type="text"
-              placeholder="Full Name"
+              placeholder="Name"
               name="fullName"
               isRequired={true}
               className={"mt-10"}

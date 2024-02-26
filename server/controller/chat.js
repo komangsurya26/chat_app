@@ -36,7 +36,7 @@ async function CreateConversation(req, res) {
 
 async function GetConversation(req, res) {
   try {
-    const { userId } = req.query;
+    const { userId } = req.params;
 
     const conversation = await sequelize.models.Conversations.findAll({
       where: { members: { [Op.contains]: [userId] } },
@@ -59,16 +59,26 @@ async function GetConversation(req, res) {
 
 async function CreateMessage(req, res) {
   try {
-    const { conversationId, senderId, receiveId, message } = req.body;
+    const { conversationId, senderId, message, receiveId = "" } = req.body;
 
     if (!senderId || !message) {
-      return res.status(400).json("Please input senderId and message");
+      return res.status(400).json("Please provide senderId and message");
     }
 
-    if (!conversationId || !receiveId) {
-      return res
-        .status(400)
-        .json("Please provide either conversationId or receiveId");
+    if (conversationId === "new" && receiveId) {
+      const newConversation = await sequelize.models.Conversations.create({
+        members: [senderId, receiveId],
+      });
+      await newConversation.save();
+      const newMessages = await sequelize.models.Messages.create({
+        conversationId: newConversation.id,
+        senderId,
+        message,
+      });
+      await newMessages.save();
+      return res.status(201).json("Message sent successfully");
+    } else if (!conversationId && !receiveId) {
+      return res.status(400).json("Please fill all the required fields");
     }
 
     const newMessage = await sequelize.models.Messages.create({
@@ -76,6 +86,8 @@ async function CreateMessage(req, res) {
       senderId,
       message,
     });
+
+    await newMessage.save();
 
     return res.status(201).json("Message sent successfully");
   } catch (error) {
@@ -86,21 +98,40 @@ async function CreateMessage(req, res) {
 
 async function GetMessages(req, res) {
   try {
-    const { conversationId } = req.query;
+    const { conversationId } = req.params;
+    const { senderId, receiveId } = req.query;
 
-    const messages = await sequelize.models.Messages.findAll({
-      where: { conversationId },
-    });
-    const messageUserData = Promise.all(
-      messages.map(async (message) => {
-        const user = await sequelize.models.Users.findByPk(message.senderId);
-        return {
-          user: { id: user.id, email: user.email, fullName: user.fullName },
-          message: message.message,
-        };
-      })
-    );
-    return res.status(200).json(await messageUserData);
+    const checkMessage = async (conversationId) => {
+      const messages = await sequelize.models.Messages.findAll({
+        where: { conversationId },
+      });
+      const messageUserData = Promise.all(
+        messages.map(async (message) => {
+          const user = await sequelize.models.Users.findByPk(message.senderId);
+          return {
+            user: { id: user.id, email: user.email, fullName: user.fullName },
+            message: message.message,
+          };
+        })
+      );
+      return res.status(200).json(await messageUserData);
+    };
+
+
+    if (conversationId === "new") {
+      const checkConcersation = await sequelize.models.Conversations.findAll({
+        where: {
+          members: { [Op.contains]: [senderId, receiveId] },
+        },
+      });
+      if (checkConcersation.length > 0) {
+        checkMessage(checkConcersation[0].id);
+      } else {
+        return res.status(200).json([]);
+      }
+    } else {
+      checkMessage(conversationId);
+    }
   } catch (error) {
     console.log(error);
   }

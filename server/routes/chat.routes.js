@@ -3,8 +3,8 @@ const { CreateConversation, GetConversation, CreateMessage, GetMessages } = requ
 
 router
   .post("/api/conversation", CreateConversation)
-  .get("/api/conversation", GetConversation)
+  .get("/api/conversation/:userId", GetConversation)
   .post("/api/message", CreateMessage)
-  .get("/api/message", GetMessages);
+  .get("/api/message/:conversationId", GetMessages);
 
 module.exports = router;

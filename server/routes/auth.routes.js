@@ -4,6 +4,6 @@ const { Register, Login, GetUsers } = require("../controller/auth");
 router
   .post("/api/register", Register)
   .post("/api/login", Login)
-  .get("/api/users", GetUsers);
+  .get("/api/users/:userId", GetUsers);
 
 module.exports = router;
