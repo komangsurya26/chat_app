@@ -42,7 +42,7 @@ const Dashboard = () => {
       console.log("data>>",data);
       setMessages(prev => ({
         ...prev,
-        message: [...prev.message, {user: data.user, message: data.message}]
+        message: [...prev.message || [], {user: data.user, message: data.message}]
       }))
     })
   }, [socket, user]);

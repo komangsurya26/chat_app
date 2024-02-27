@@ -59,24 +59,41 @@ async function GetConversation(req, res) {
 
 async function CreateMessage(req, res) {
   try {
-    const { conversationId, senderId, message, receiveId = "" } = req.body;
+    const { conversationId, senderId, message, receiveId } = req.body;
 
     if (!senderId || !message) {
       return res.status(400).json("Please provide senderId and message");
     }
 
     if (conversationId === "new" && receiveId) {
-      const newConversation = await sequelize.models.Conversations.create({
-        members: [senderId, receiveId],
-      });
-      await newConversation.save();
-      const newMessages = await sequelize.models.Messages.create({
-        conversationId: newConversation.id,
-        senderId,
-        message,
-      });
-      await newMessages.save();
-      return res.status(201).json("Message sent successfully");
+      const findCeonversation = await sequelize.models.Conversations.findAll({
+        where: {
+          members: { [Op.contains]: [senderId, receiveId] },
+        }
+      })
+      if (findCeonversation.length === 0) {
+        const newConversation = await sequelize.models.Conversations.create({
+          members: [senderId, receiveId],
+        });
+        await newConversation.save();
+        const newMessages = await sequelize.models.Messages.create({
+          conversationId: newConversation.id,
+          senderId,
+          message,
+        });
+        await newMessages.save();
+        return res.status(201).json("Message sent successfully");
+        
+      } else {
+        const newMessages = await sequelize.models.Messages.create({
+          conversationId: findCeonversation[0].id,
+          senderId,
+          message,
+        });
+        await newMessages.save();
+        return res.status(201).json("Message sent successfully");
+      }
+     
     } else if (!conversationId && !receiveId) {
       return res.status(400).json("Please fill all the required fields");
     }
