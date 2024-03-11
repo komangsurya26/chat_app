@@ -19,7 +19,7 @@ const Form = ({ isLoginPage }) => {
       : { fullName, email, password };
 
     const res = await fetch(
-      `http://34.101.224.73/api/${isLoginPage ? "login" : "register"}`,
+      `http://localhost:2001/api/${isLoginPage ? "login" : "register"}`,
       {
         method: "POST",
         headers: {
