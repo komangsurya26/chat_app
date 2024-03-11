@@ -1,4 +1,4 @@
-![Example Image](../foto.png)
+![Example Image](./foto.png)
 
 
 # Getting Started with Create React App
