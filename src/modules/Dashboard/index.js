@@ -28,7 +28,7 @@ const Dashboard = () => {
  
 
   useEffect(() => {
-    const newSocket = io("http://localhost:2001");
+    const newSocket = io("http://34.101.224.73");
     setSocket(newSocket);
     return () => newSocket.close();
   }, []);
@@ -52,7 +52,7 @@ const Dashboard = () => {
   useEffect(() => {
     const loged = JSON.parse(localStorage.getItem("user"));
     const fetchConversation = async () => {
-      const res = await fetch(`http://localhost:2001/api/conversation/${loged.id}`, {
+      const res = await fetch(`http://34.101.224.73/api/conversation/${loged.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -66,7 +66,7 @@ const Dashboard = () => {
  
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch(`http://localhost:2001/api/users/${user.id}`, {
+      const res = await fetch(`http://34.101.224.73/api/users/${user.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -80,7 +80,7 @@ const Dashboard = () => {
 
   const fetchMessages = async (conversationId, receiver) => {
     const res = await fetch(
-      `http://localhost:2001/api/message/${conversationId}/?senderId=${user?.id}&receiveId=${receiver?.id}`,
+      `http://34.101.224.73/api/message/${conversationId}/?senderId=${user?.id}&receiveId=${receiver?.id}`,
       {
         method: "GET",
         headers: {
@@ -100,7 +100,7 @@ const Dashboard = () => {
       message: message,
       conversationId: messages?.conversationId,
     })
-    const res = await fetch(`http://localhost:2001/api/message`, {
+    const res = await fetch(`http://34.101.224.73/api/message`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
